@@ -1,0 +1,23 @@
+# Monorepo
+node_modules/
+.turbo/
+dist/
+.next/
+build/
+
+# Env
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
