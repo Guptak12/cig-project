@@ -1,0 +1,151 @@
+// This is your Prisma schema file.
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  PHOTOGRAPHER
+  MEMBER
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  role         Role          @default(MEMBER)
+  /// S3 key of reference selfie for facial recognition
+  selfieKey    String?
+  /// AWS Rekognition face ID indexed from the selfie
+  faceId       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  albumMembers AlbumMember[]
+  reactions    Reaction[]
+  comments     Comment[]
+  mediaUploads Media[]
+}
+
+model Club {
+  id        String   @id @default(cuid())
+  name      String
+  logoUrl   String?
+  createdAt DateTime @default(now())
+
+  events Event[]
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  date        DateTime
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clubId String
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  albums Album[]
+
+  @@index([name])
+  @@index([clubId])
+}
+
+model Album {
+  id        String   @id @default(cuid())
+  name      String
+  isPublic  Boolean  @default(true)
+  /// UUID token used for QR-based public sharing
+  qrToken   String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  media   Media[]
+  members AlbumMember[]
+
+  @@index([eventId])
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  /// S3 key of the original image (private bucket)
+  s3Key     String
+  /// S3 key of the resized thumbnail (public bucket)
+  thumbKey  String?
+  mimeType  String
+  /// AI-generated labels from Rekognition.detectLabels
+  tags      String[]
+  /// Rekognition face IDs found in this image (used for My Photos query)
+  faceIds   String[]
+  /// AI-generated caption (bonus feature)
+  caption   String?
+  createdAt DateTime @default(now())
+
+  albumId String
+  album   Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+
+  reactions Reaction[]
+  comments  Comment[]
+
+  @@index([albumId])
+  @@index([uploadedById])
+}
+
+model AlbumMember {
+  userId  String
+  albumId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  album Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@id([userId, albumId])
+}
+
+model Reaction {
+  id   String @id @default(cuid())
+  type String // "like" | "love" | "fire"
+
+  mediaId String
+  userId  String
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// One reaction type per user per media item
+  @@unique([mediaId, userId])
+  @@index([mediaId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+  createdAt DateTime @default(now())
+
+  mediaId String
+  userId  String
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([mediaId])
+}
