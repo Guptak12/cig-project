@@ -23,7 +23,25 @@ const PORT = process.env.PORT ?? 4000;
 // ─── Global middleware ────────────────────────────────────────────────────────
 
 app.use(helmet());
-app.use(cors({ origin: process.env.WEB_URL ?? 'http://localhost:3000', credentials: true }));
+
+// Robust CORS configuration
+const webUrl = process.env.WEB_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+const allowedOrigins = [webUrl, 'http://localhost:3000'];
+
+app.use(cors({ 
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('https://cig-project-web-')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }, 
+  credentials: true 
+}));
+
 app.use(morgan('dev'));
 app.use(express.json());
 
