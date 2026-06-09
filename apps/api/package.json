@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "concurrently \"tsx watch src/index.ts\" \"tsx watch src/worker.ts\"",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
+    "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts"
   },
@@ -23,6 +23,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
+    "tsx": "^4.19.4",
     "uuid": "^11.1.0",
     "zod": "^3.24.2"
   },
@@ -36,7 +37,6 @@
     "@types/node": "^22.15.21",
     "@types/uuid": "^10.0.0",
     "concurrently": "^8.2.2",
-    "tsx": "^4.19.4",
     "typescript": "^5.7.3"
   }
 }
