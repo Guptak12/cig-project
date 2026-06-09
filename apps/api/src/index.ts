@@ -33,9 +33,11 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('https://cig-project-web-')) {
+    // Allow configured origins and Vercel deployments (both prod and preview)
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('https://cig-project-web')) {
       callback(null, true);
     } else {
+      console.warn(`Blocked CORS request from origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   }, 
