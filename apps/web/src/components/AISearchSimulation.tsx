@@ -44,7 +44,7 @@ export function AISearchSimulation() {
         borderRadius: 'var(--radius-lg)',
         background: '#0d0d12',
         border: step === 1 ? '1.5px solid var(--color-primary)' : '1.5px solid rgba(255, 255, 255, 0.05)',
-        boxShadow: step === 1 ? '0 0 20px rgba(99, 102, 241, 0.3)' : 'none',
+        boxShadow: step === 1 ? '0 0 20px rgba(244, 240, 231, 0.22)' : 'none',
         transition: 'all 0.4s ease',
       }}
     >
@@ -64,7 +64,7 @@ export function AISearchSimulation() {
           position: 'relative',
         }}
       >
-        <span style={{ fontSize: '1.1rem' }}>🔍</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 700, letterSpacing: '0.05em' }}>SEARCH</span>
         <span style={{ display: 'inline-flex', alignItems: 'center' }}>
           {typedText}
           {step === 0 && (
@@ -87,7 +87,7 @@ export function AISearchSimulation() {
             fontWeight: 700,
             textTransform: 'uppercase',
             color: 'var(--color-primary)',
-            background: 'rgba(99, 102, 241, 0.12)',
+            background: 'rgba(244, 240, 231, 0.10)',
             padding: '2px 8px',
             borderRadius: '4px',
           }}

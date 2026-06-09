@@ -197,9 +197,9 @@ function GalleryCard({ item, thumbBaseUrl }: { item: MediaItem; thumbBaseUrl: st
                       className="badge badge-purple"
                       style={{
                         fontSize: '0.68rem',
-                        background: 'rgba(99, 102, 241, 0.25)',
-                        color: '#a5b4fc',
-                        border: '1px solid rgba(99, 102, 241, 0.2)',
+                        background: 'rgba(244, 240, 231, 0.16)',
+                        color: '#e6ddcb',
+                        border: '1px solid rgba(244, 240, 231, 0.18)',
                       }}
                     >
                       #{tag}

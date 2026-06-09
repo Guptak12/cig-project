@@ -6,11 +6,13 @@ import {
 } from '@aws-sdk/client-rekognition';
 import { fetchS3Object, BUCKET_ORIGINALS } from './s3.js';
 
+const isMock = process.env.AWS_ACCESS_KEY_ID === 'mock-access-key-id';
+
 const rekognition = new RekognitionClient({
   region: process.env.AWS_REGION ?? 'us-east-1',
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? 'mock',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? 'mock',
   },
 });
 
@@ -21,6 +23,10 @@ const FACE_COLLECTION_ID = process.env.REKOGNITION_COLLECTION_ID ?? 'cig-faces';
  * Returns the assigned FaceId to store on the User record.
  */
 export async function indexUserFace(selfieS3Key: string, userId: string): Promise<string | null> {
+  if (isMock) {
+    return `mock-face-id-${userId}`;
+  }
+
   const command = new IndexFacesCommand({
     CollectionId: FACE_COLLECTION_ID,
     Image: {
@@ -41,6 +47,12 @@ export async function indexUserFace(selfieS3Key: string, userId: string): Promis
  * Called for each confirmed media upload in the background job.
  */
 export async function searchFacesInPhoto(photoS3Key: string): Promise<string[]> {
+  if (isMock) {
+    const { prisma } = await import('@cig/db');
+    const users = await prisma.user.findMany({ where: { faceId: { not: null } } });
+    return users.map((u) => u.faceId!).filter(Boolean);
+  }
+
   const imageBuffer = await fetchS3Object(photoS3Key);
 
   const command = new SearchFacesByImageCommand({
@@ -71,6 +83,10 @@ export async function searchFacesInPhoto(photoS3Key: string): Promise<string[]> 
  * Returns a flat list of label names.
  */
 export async function detectImageLabels(photoS3Key: string): Promise<string[]> {
+  if (isMock) {
+    return ['Event', 'People', 'Gathering', 'Club', 'Smile'];
+  }
+
   const command = new DetectLabelsCommand({
     Image: {
       S3Object: { Bucket: BUCKET_ORIGINALS, Name: photoS3Key },

@@ -150,7 +150,7 @@ export function AuraFooter() {
             fontSize: '0.78rem',
           }}
         >
-          <p>© 2026 Aura Platform. Built for Ponder.ai visual benchmark.</p>
+          <p>© 2026 Aura Platform. Event media intelligence for clubs.</p>
           <p>Cinematic Gallery System</p>
         </div>
       </div>

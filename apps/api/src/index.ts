@@ -12,6 +12,9 @@ import { mediaRouter } from './routes/media.js';
 import { usersRouter } from './routes/users.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
+import fs from 'fs';
+import path from 'path';
+
 const app = express();
 const PORT = process.env.PORT ?? 4000;
 
@@ -40,6 +43,32 @@ app.use('/events', eventsRouter);
 app.use('/albums', albumsRouter);
 app.use('/media', mediaRouter);
 app.use('/users', usersRouter);
+
+// Mock S3 endpoints for offline development using mock credentials
+if (process.env.AWS_ACCESS_KEY_ID === 'mock-access-key-id') {
+  app.put('/mock-s3-upload', express.raw({ type: '*/*', limit: '50mb' }), (req, res) => {
+    const key = req.query.key as string;
+    if (!key) {
+      res.status(400).send('Missing key parameter');
+      return;
+    }
+    const filePath = path.join('/Users/destructor/Desktop/Kush/Projects/cig-project/storage/originals', key);
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, req.body);
+    res.send({ ok: true });
+  });
+
+  app.get('/mock-s3-view/:bucket/*', (req, res) => {
+    const { bucket } = req.params;
+    const fileKey = (req.params as any)[0];
+    const filePath = path.join('/Users/destructor/Desktop/Kush/Projects/cig-project/storage', bucket, fileKey);
+    if (!fs.existsSync(filePath)) {
+      res.status(404).send('Mock S3 file not found');
+      return;
+    }
+    res.sendFile(filePath);
+  });
+}
 
 // Health check — used by Docker Compose healthcheck
 app.get('/health', (_req, res) => {

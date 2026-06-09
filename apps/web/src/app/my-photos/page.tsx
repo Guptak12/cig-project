@@ -17,6 +17,7 @@ export default function MyPhotosPage() {
   const [selfieSuccess, setSelfieSuccess] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL ?? '';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
   useEffect(() => {
     if (!user) return;
@@ -47,7 +48,7 @@ export default function MyPhotosPage() {
       const formData = new FormData();
       formData.append('selfie', file);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/selfie`, {
+      const res = await fetch(`${apiUrl}/users/selfie`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -78,7 +79,6 @@ export default function MyPhotosPage() {
     return (
       <div className="container" style={{ paddingTop: 'var(--space-16)', textAlign: 'center' }}>
         <div className="empty-state">
-          <div className="empty-state-icon">🔒</div>
           <p style={{ marginBottom: 'var(--space-5)' }}>Sign in to find your photos.</p>
           <Link href="/auth/login" className="btn btn-primary">Sign in</Link>
         </div>
@@ -90,7 +90,7 @@ export default function MyPhotosPage() {
     <div className="container" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-16)' }}>
       <header style={{ marginBottom: 'var(--space-10)' }}>
         <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 'var(--space-2)' }}>
-          🧑‍🤳 Face Discovery
+          Face Discovery
         </h1>
         <p style={{ color: 'var(--color-text-muted)' }}>
           AI-driven instant facial recognition. Scan your face once, find all matching photos immediately.
@@ -110,7 +110,7 @@ export default function MyPhotosPage() {
           <div style={{ flex: 1, minWidth: 240 }}>
             <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 700, marginBottom: 'var(--space-2)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
               {hasFaceId ? (
-                <><span style={{ color: 'var(--color-primary)' }}>✨</span> Reference Selfie Indexed</>
+                <>Reference Selfie Indexed</>
               ) : (
                 <>Upload Reference Selfie</>
               )}
@@ -152,7 +152,7 @@ export default function MyPhotosPage() {
               ) : hasFaceId ? (
                 'Update Reference'
               ) : (
-                '📸 Take Selfie'
+                'Take Selfie'
               )}
             </button>
           </div>
@@ -182,7 +182,6 @@ export default function MyPhotosPage() {
         </div>
       ) : photos.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon" style={{ color: 'var(--color-primary)', opacity: 0.75 }}>{hasFaceId ? '🔍' : '🧑‍🤳'}</div>
           <p style={{ fontSize: '0.92rem', color: 'var(--color-text-muted)' }}>
             {hasFaceId
               ? 'No photos found yet. Photos where you are discovered will show up here dynamically.'
@@ -210,7 +209,7 @@ export default function MyPhotosPage() {
                   <div className="media-card-overlay">
                     <div className="media-card-actions">
                       <a
-                        href={`${process.env.NEXT_PUBLIC_API_URL}/media/${photo.id}/download`}
+                        href={`${apiUrl}/media/${photo.id}/download`}
                         download
                         className="btn btn-ghost btn-sm"
                         style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)', width: '100%', justifyContent: 'center' }}
