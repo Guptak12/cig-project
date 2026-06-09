@@ -4,11 +4,10 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
-import path from 'path';
 import dotenv from 'dotenv';
 
-// Load root .env file
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+// Load .env (if not already loaded by the consuming app)
+dotenv.config();
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL || "postgresql://cig:cig_secret@localhost:5432/cig_db" });
 const adapter = new PrismaPg(pool);

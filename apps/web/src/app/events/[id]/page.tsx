@@ -7,11 +7,13 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
   try {
-    const res = await fetch(`${apiUrl}/events/${id}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${apiUrl}/events/${id}`, { cache: 'no-store' });
     if (res.ok) {
       const json = await res.json();
       return { title: json.data?.name ?? 'Event', description: json.data?.description ?? '' };

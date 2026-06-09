@@ -7,6 +7,8 @@ interface Props {
   params: Promise<{ id: string; albumId: string }>;
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { albumId } = await params;
   return {
@@ -24,7 +26,7 @@ export default async function AlbumPage({ params }: Props) {
   // Fetch event info for breadcrumb
   let eventName = 'Event';
   try {
-    const res = await fetch(`${apiUrl}/events/${id}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${apiUrl}/events/${id}`, { cache: 'no-store' });
     if (res.ok) {
       const json = await res.json();
       eventName = json.data?.name ?? 'Event';

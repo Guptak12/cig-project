@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: 'Browse all club events and their photo albums.',
 };
 
+export const dynamic = 'force-dynamic';
+
 interface Event {
   id: string;
   name: string;
