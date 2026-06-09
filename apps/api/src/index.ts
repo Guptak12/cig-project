@@ -22,6 +22,7 @@ const PORT = process.env.PORT ?? 4000;
 
 // ─── Global middleware ────────────────────────────────────────────────────────
 
+app.set('trust proxy', 1);
 app.use(helmet());
 
 // Robust CORS configuration

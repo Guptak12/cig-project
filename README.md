@@ -90,6 +90,45 @@ docker compose up -d
 
 Services: `web` (3000), `api` (4000), `worker`, `postgres`, `redis`
 
+## Deployment (Vercel + Railway)
+
+### Vercel web environment
+
+Set these before building/redeploying the frontend:
+
+```bash
+NEXT_PUBLIC_API_URL=https://<your-railway-api>.up.railway.app
+NEXT_PUBLIC_CDN_URL=https://<your-cloudfront-distribution>.cloudfront.net
+```
+
+### Railway API environment
+
+Set these on the API service:
+
+```bash
+DATABASE_URL=<railway-postgres-url>
+REDIS_URL=<railway-redis-url>
+JWT_SECRET=<strong-secret>
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=<aws-access-key-id>
+AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
+S3_BUCKET_ORIGINALS=cig-media-originals
+S3_BUCKET_THUMBS=cig-media-thumbs
+REKOGNITION_COLLECTION_ID=cig-faces
+CDN_URL=https://<your-cloudfront-distribution>.cloudfront.net
+WEB_URL=https://cig-project-web.vercel.app
+```
+
+### Railway worker service
+
+Face discovery for album uploads runs in the background worker, not in the API process. Create a second Railway service from the same repo with the same `DATABASE_URL`, `REDIS_URL`, and AWS variables, then use:
+
+```bash
+npm run start:worker --workspace=@cig/api
+```
+
+If the worker is not running, uploads will create media rows, but `thumbKey`, `tags`, and `faceIds` stay empty, so Face Discovery returns no matches.
+
 ---
 
 ## Database Schema

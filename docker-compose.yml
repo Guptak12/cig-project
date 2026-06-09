@@ -67,7 +67,7 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     restart: unless-stopped
-    command: ["node", "--import", "tsx/esm", "src/worker.ts"]
+    command: ["node", "dist/worker.js"]
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://cig:cig_secret@postgres:5432/cig_db
