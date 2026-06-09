@@ -4,6 +4,9 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SpotlightCard } from './SpotlightCard';
+import { api } from '@/lib/api';
+import { buildMediaUrl } from '@/lib/media-url';
+import { downloadMedia } from '@/lib/download-media';
 
 interface MediaItem {
   id: string;
@@ -19,38 +22,31 @@ interface Props {
   thumbBaseUrl: string; // CloudFront base URL for public thumbs
 }
 
-const PAGE_SIZE = 24;
-
 export function InfiniteGallery({ albumId, thumbBaseUrl }: Props) {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState('');
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const fetchPage = useCallback(
     async (cursor?: string) => {
       if (isLoading) return;
       setIsLoading(true);
+      setError('');
 
       try {
-        const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
-        if (cursor) params.set('cursor', cursor);
-
-        const token = localStorage.getItem('auth-token');
-        const res = await fetch(`/api/v1/albums/${albumId}/media?${params}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) throw new Error('Failed to fetch media');
-
-        const json = await res.json();
-        const { items: newItems, nextCursor: newCursor } = json.data;
+        const { items: newItems, nextCursor: newCursor } = await api.albums.getMedia(
+          albumId,
+          cursor,
+        );
 
         setItems((prev) => (cursor ? [...prev, ...newItems] : newItems));
         setNextCursor(newCursor);
         setHasMore(Boolean(newCursor));
       } catch (err) {
+        setError((err as Error).message || 'Failed to fetch media');
         console.error('[gallery] Fetch error:', err);
       } finally {
         setIsLoading(false);
@@ -83,6 +79,15 @@ export function InfiniteGallery({ albumId, thumbBaseUrl }: Props) {
   }, [hasMore, isLoading, nextCursor, fetchPage]);
 
   if (items.length === 0 && !isLoading) {
+    if (error) {
+      return (
+        <div className="empty-state">
+          <div className="empty-state-icon">⚠️</div>
+          <p>{error}</p>
+        </div>
+      );
+    }
+
     return (
       <div className="empty-state">
         <div className="empty-state-icon">🖼️</div>
@@ -112,6 +117,12 @@ export function InfiniteGallery({ albumId, thumbBaseUrl }: Props) {
       {/* Scroll sentinel */}
       <div ref={sentinelRef} style={{ height: 1 }} aria-hidden />
 
+      {error && items.length > 0 && (
+        <p style={{ textAlign: 'center', color: 'var(--color-danger)', padding: 'var(--space-4)' }}>
+          {error}
+        </p>
+      )}
+
       {!hasMore && items.length > 0 && (
         <p style={{ textAlign: 'center', color: 'var(--color-text-subtle)', padding: 'var(--space-8)' }}>
           You've seen all {items.length} photos ✓
@@ -129,15 +140,13 @@ function GalleryCard({ item, thumbBaseUrl }: { item: MediaItem; thumbBaseUrl: st
   const [isHovered, setIsHovered] = useState(false);
 
   const thumbUrl = item.thumbKey
-    ? `${thumbBaseUrl}/${item.thumbKey}`
-    : `${thumbBaseUrl}/${item.s3Key}`;
+    ? buildMediaUrl(thumbBaseUrl, 'thumbs', item.thumbKey)
+    : buildMediaUrl(thumbBaseUrl, 'originals', item.s3Key);
 
   function handleLike() {
-    setIsLiked((prev) => {
-      const next = !prev;
-      setLikeCount((c) => (next ? c + 1 : c - 1));
-      return next;
-    });
+    const next = !isLiked;
+    setIsLiked(next);
+    setLikeCount((c) => (next ? c + 1 : c - 1));
   }
 
   return (
@@ -252,9 +261,8 @@ function GalleryCard({ item, thumbBaseUrl }: { item: MediaItem; thumbBaseUrl: st
               💬 {item._count.comments}
             </button>
 
-            <a
-              href={`/api/v1/media/${item.id}/download`}
-              download
+            <button
+              onClick={() => downloadMedia(item.id)}
               className="btn btn-ghost btn-sm"
               style={{
                 color: '#fff',
@@ -266,7 +274,7 @@ function GalleryCard({ item, thumbBaseUrl }: { item: MediaItem; thumbBaseUrl: st
               aria-label="Download photo"
             >
               ↓
-            </a>
+            </button>
           </div>
         </div>
       </div>

@@ -82,6 +82,44 @@ export function Navbar() {
             Events
           </Link>
         </li>
+        {(user?.role === 'ADMIN' || user?.role === 'CLUB') && (
+          <li>
+            <Link
+              href="/events/new"
+              className={`navbar-link ${isActive('/events/new') ? 'active' : ''}`}
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontWeight: 500,
+                fontSize: '0.9rem',
+                color: isActive('/events/new') ? 'var(--color-text)' : 'var(--color-text-muted)',
+                padding: '6px 12px',
+                borderRadius: 'var(--radius-md)',
+                transition: 'color 0.2s, background 0.2s',
+              }}
+            >
+              Create Event
+            </Link>
+          </li>
+        )}
+        {user?.role === 'ADMIN' && (
+          <li>
+            <Link
+              href="/admin/approvals"
+              className={`navbar-link ${isActive('/admin/approvals') ? 'active' : ''}`}
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontWeight: 500,
+                fontSize: '0.9rem',
+                color: isActive('/admin/approvals') ? 'var(--color-text)' : 'var(--color-text-muted)',
+                padding: '6px 12px',
+                borderRadius: 'var(--radius-md)',
+                transition: 'color 0.2s, background 0.2s',
+              }}
+            >
+              Approvals
+            </Link>
+          </li>
+        )}
         {user && (
           <li>
             <Link
@@ -101,7 +139,7 @@ export function Navbar() {
             </Link>
           </li>
         )}
-        {(user?.role === 'ADMIN' || user?.role === 'PHOTOGRAPHER') && (
+        {user && (
           <li>
             <Link
               href="/upload"

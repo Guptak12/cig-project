@@ -23,8 +23,8 @@ eventsRouter.get('/', async (_req, res, next) => {
   }
 });
 
-// POST /events — admin only
-eventsRouter.post('/', requireAuth, requireRole('ADMIN'), async (req, res, next) => {
+// POST /events — admin or club account
+eventsRouter.post('/', requireAuth, requireRole('ADMIN', 'CLUB'), async (req, res, next) => {
   try {
     const body = CreateEventSchema.parse(req.body);
     const event = await prisma.event.create({
@@ -70,8 +70,8 @@ eventsRouter.get('/:id', async (req, res, next) => {
   }
 });
 
-// PATCH /events/:id — admin only
-eventsRouter.patch('/:id', requireAuth, requireRole('ADMIN'), async (req, res, next) => {
+// PATCH /events/:id — admin or club account
+eventsRouter.patch('/:id', requireAuth, requireRole('ADMIN', 'CLUB'), async (req, res, next) => {
   try {
     const id = param(req, 'id');
     const body = CreateEventSchema.partial().parse(req.body);
@@ -91,8 +91,8 @@ eventsRouter.patch('/:id', requireAuth, requireRole('ADMIN'), async (req, res, n
   }
 });
 
-// DELETE /events/:id — admin only
-eventsRouter.delete('/:id', requireAuth, requireRole('ADMIN'), async (req, res, next) => {
+// DELETE /events/:id — admin or club account
+eventsRouter.delete('/:id', requireAuth, requireRole('ADMIN', 'CLUB'), async (req, res, next) => {
   try {
     const id = param(req, 'id');
     await prisma.event.delete({ where: { id } });
@@ -102,11 +102,11 @@ eventsRouter.delete('/:id', requireAuth, requireRole('ADMIN'), async (req, res, 
   }
 });
 
-// POST /events/:id/albums — admin or photographer
+// POST /events/:id/albums — admin, club account, or photographer
 eventsRouter.post(
   '/:id/albums',
   requireAuth,
-  requireRole('ADMIN', 'PHOTOGRAPHER'),
+  requireRole('ADMIN', 'CLUB', 'PHOTOGRAPHER'),
   async (req, res, next) => {
     try {
       const eventId = param(req, 'id');

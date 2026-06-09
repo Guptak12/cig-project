@@ -13,6 +13,7 @@ datasource db {
 
 enum Role {
   ADMIN
+  CLUB
   PHOTOGRAPHER
   MEMBER
 }
@@ -25,6 +26,8 @@ model User {
   email        String        @unique
   passwordHash String
   role         Role          @default(MEMBER)
+  isApproved   Boolean       @default(true)
+  approvedAt   DateTime?
   /// S3 key of reference selfie for facial recognition
   selfieKey    String?
   /// AWS Rekognition face ID indexed from the selfie

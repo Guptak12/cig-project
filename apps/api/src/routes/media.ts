@@ -62,7 +62,12 @@ mediaRouter.post('/:id/reactions', requireAuth, async (req, res, next) => {
     if (existing && existing.type === type) {
       // Same type → remove (toggle off)
       await prisma.reaction.delete({ where: { mediaId_userId: { mediaId, userId } } });
-      res.json({ ok: true, data: null });
+      const counts = await prisma.reaction.groupBy({
+        by: ['type'],
+        where: { mediaId },
+        _count: { type: true },
+      });
+      res.json({ ok: true, data: { counts, userReaction: null } });
       return;
     }
 
@@ -73,7 +78,13 @@ mediaRouter.post('/:id/reactions', requireAuth, async (req, res, next) => {
       create: { mediaId, userId, type },
     });
 
-    res.json({ ok: true, data: reaction });
+    const counts = await prisma.reaction.groupBy({
+      by: ['type'],
+      where: { mediaId },
+      _count: { type: true },
+    });
+
+    res.json({ ok: true, data: { reaction, counts, userReaction: reaction.type } });
   } catch (err) {
     next(err);
   }

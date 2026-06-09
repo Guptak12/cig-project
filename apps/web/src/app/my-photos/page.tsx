@@ -5,6 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { api, type MyPhoto } from '@/lib/api';
+import { buildMediaUrl } from '@/lib/media-url';
+import { downloadMedia } from '@/lib/download-media';
 import { SpotlightCard } from '@/components/SpotlightCard';
 
 export default function MyPhotosPage() {
@@ -195,7 +197,9 @@ export default function MyPhotosPage() {
           </p>
           <div className="gallery-grid">
             {photos.map((photo) => {
-              const src = photo.thumbKey ? `${cdnUrl}/${photo.thumbKey}` : `${cdnUrl}/${photo.s3Key}`;
+              const src = photo.thumbKey
+                ? buildMediaUrl(cdnUrl, 'thumbs', photo.thumbKey)
+                : buildMediaUrl(cdnUrl, 'originals', photo.s3Key);
               return (
                 <article key={photo.id} className="media-card" style={{ borderRadius: 'var(--radius-md)' }}>
                   <Image
@@ -208,15 +212,14 @@ export default function MyPhotosPage() {
                   />
                   <div className="media-card-overlay">
                     <div className="media-card-actions">
-                      <a
-                        href={`${apiUrl}/media/${photo.id}/download`}
-                        download
+                      <button
+                        onClick={() => downloadMedia(photo.id)}
                         className="btn btn-ghost btn-sm"
                         style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)', width: '100%', justifyContent: 'center' }}
                         aria-label="Download"
                       >
                         ↓ Download
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </article>

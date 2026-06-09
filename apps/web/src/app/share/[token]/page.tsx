@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { buildMediaUrl } from '@/lib/media-url';
 
 interface Props {
   params: Promise<{ token: string }>;
@@ -15,7 +16,7 @@ interface AlbumShare {
   id: string;
   name: string;
   event: { name: string; date: string; club: { name: string } };
-  media: { id: string; thumbKey: string | null; tags: string[] }[];
+  media: { id: string; s3Key: string; thumbKey: string | null; tags: string[] }[];
 }
 
 async function getSharedAlbum(token: string): Promise<AlbumShare | null> {
@@ -84,8 +85,8 @@ export default async function SharePage({ params }: Props) {
       <div className="gallery-grid">
         {album.media.map((item) => {
           const src = item.thumbKey
-            ? `${cdnUrl}/${item.thumbKey}`
-            : `${cdnUrl}/${item.id}`;
+            ? buildMediaUrl(cdnUrl, 'thumbs', item.thumbKey)
+            : buildMediaUrl(cdnUrl, 'originals', item.s3Key);
 
           return (
             <article key={item.id} className="media-card">

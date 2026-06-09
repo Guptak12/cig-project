@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 
-export type WatermarkRole = 'ADMIN' | 'PHOTOGRAPHER' | 'MEMBER';
+export type WatermarkRole = 'ADMIN' | 'CLUB' | 'PHOTOGRAPHER' | 'MEMBER';
 
 interface WatermarkOptions {
   clubName: string;

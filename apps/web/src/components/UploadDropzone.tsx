@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { api } from '@/lib/api';
 
 interface Props {
   albumId: string;
@@ -52,17 +53,11 @@ export function UploadDropzone({ albumId, onUploadComplete }: Props) {
     );
 
     try {
-      const token = localStorage.getItem('auth-token');
-
       // Step 1: get presigned URL
-      const presignRes = await fetch(`/api/v1/albums/${albumId}/media/presign`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ fileName: entry.file.name, contentType: entry.file.type, albumId }),
+      const presignData = await api.albums.presign(albumId, {
+        fileName: entry.file.name,
+        contentType: entry.file.type,
       });
-
-      if (!presignRes.ok) throw new Error('Failed to get upload URL');
-      const { data: presignData } = await presignRes.json();
 
       // Step 2: PUT directly to S3
       const xhr = new XMLHttpRequest();
@@ -81,11 +76,7 @@ export function UploadDropzone({ albumId, onUploadComplete }: Props) {
       });
 
       // Step 3: confirm upload → triggers background job
-      await fetch(`/api/v1/albums/${albumId}/media/confirm`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ s3Key: presignData.s3Key, albumId }),
-      });
+      await api.albums.confirm(albumId, presignData.s3Key);
 
       setFiles((prev) =>
         prev.map((f, i) => (i === index ? { ...f, status: 'done', progress: 100 } : f)),

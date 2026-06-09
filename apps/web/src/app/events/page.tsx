@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { EventsPageActions } from '@/components/EventsPageActions';
 
 export const metadata: Metadata = {
   title: 'Events',
@@ -20,7 +21,7 @@ async function getEvents(): Promise<Event[]> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
     const res = await fetch(`${apiUrl}/events`, {
-      next: { revalidate: 60 }, // ISR — revalidate every minute
+      cache: 'no-store', // Always fetch fresh data so UI reflects deletions/additions
     });
 
     if (!res.ok) return [];
@@ -38,12 +39,17 @@ export default async function EventsPage() {
   return (
     <div className="container" style={{ paddingTop: 'var(--space-10)', paddingBottom: 'var(--space-16)' }}>
       <header style={{ marginBottom: 'var(--space-10)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
+          <div>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 'var(--space-2)' }}>
           Events
         </h1>
         <p style={{ color: 'var(--color-text-muted)' }}>
           Browse and explore all club events — sorted by name.
         </p>
+          </div>
+          <EventsPageActions />
+        </div>
       </header>
 
       {events.length === 0 ? (

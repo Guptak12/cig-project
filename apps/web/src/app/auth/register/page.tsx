@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
+import type { AuthUser } from '@/lib/api';
+
+type SignupRole = AuthUser['role'];
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -11,6 +14,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<SignupRole>('MEMBER');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -20,8 +24,14 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      await register(name, email, password);
-      router.push('/my-photos'); // go to selfie setup after registration
+      const result = await register(name, email, password, role);
+
+      if (result.needsApproval) {
+        router.push(`/auth/pending?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
+      router.push('/my-photos');
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -91,6 +101,21 @@ export default function RegisterPage() {
             </div>
 
             <div className="form-group">
+              <label htmlFor="reg-role" className="form-label">Account type</label>
+              <select
+                id="reg-role"
+                className="input"
+                value={role}
+                onChange={(e) => setRole(e.target.value as SignupRole)}
+              >
+              <option value="MEMBER">Member</option>
+              <option value="PHOTOGRAPHER">Photographer</option>
+                <option value="CLUB">Club Account</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+
+            <div className="form-group">
               <label htmlFor="reg-password" className="form-label">Password</label>
               <input
                 id="reg-password"
@@ -107,6 +132,20 @@ export default function RegisterPage() {
 
             {error && <p className="form-error">{error}</p>}
 
+            <div
+              style={{
+                padding: 'var(--space-4)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--color-border)',
+                background: 'rgba(255,255,255,0.02)',
+                color: 'var(--color-text-muted)',
+                fontSize: '0.85rem',
+                lineHeight: 1.6,
+              }}
+            >
+              Member accounts activate immediately. Photographer and club admin accounts wait for approval from an existing admin before login is allowed.
+            </div>
+
             <button
               type="submit"
               className="btn btn-primary"
@@ -116,9 +155,6 @@ export default function RegisterPage() {
               {isLoading ? <span className="spinner" /> : 'Create Account'}
             </button>
 
-            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', textAlign: 'center' }}>
-              Your account starts as a Member. Contact an admin to upgrade to Photographer.
-            </p>
           </div>
         </form>
 

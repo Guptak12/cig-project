@@ -17,7 +17,7 @@ export default function UploadPage() {
   // Redirect if not photographer/admin
   useEffect(() => {
     if (!authLoading && user && user.role === 'MEMBER') {
-      router.push('/events');
+      return;
     }
     if (!authLoading && !user) {
       router.push('/auth/login');

@@ -47,7 +47,9 @@ export function SpotlightCard({ children, className = '', style = {} }: Props) {
           }}
         />
       )}
-      <div style={{ position: 'relative', zIndex: 2 }}>{children}</div>
+      <div style={{ position: 'relative', zIndex: 2, width: '100%', height: '100%' }}>
+        {children}
+      </div>
     </div>
   );
 }

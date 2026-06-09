@@ -35,17 +35,33 @@ export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'PHOTOGRAPHER' | 'MEMBER';
+  role: 'ADMIN' | 'CLUB' | 'PHOTOGRAPHER' | 'MEMBER';
 }
 
 export interface AuthResult {
   user: AuthUser;
-  token: string;
+  token: string | null;
+  needsApproval: boolean;
+  message?: string;
+}
+
+export interface Club {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+}
+
+export interface PendingUser {
+  id: string;
+  name: string;
+  email: string;
+  role: AuthUser['role'];
+  createdAt: string;
 }
 
 export const api = {
   auth: {
-    register: (body: { name: string; email: string; password: string; role?: string }) =>
+    register: (body: { name: string; email: string; password: string; role?: AuthUser['role'] }) =>
       request<AuthResult>('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
 
     login: (body: { email: string; password: string }) =>
@@ -57,6 +73,21 @@ export const api = {
     get: (id: string) => request<EventDetail>(`/events/${id}`),
     create: (body: CreateEventBody) =>
       request<Event>('/events', { method: 'POST', body: JSON.stringify(body) }),
+    delete: (id: string) => request<null>(`/events/${id}`, { method: 'DELETE' }),
+    createAlbum: (eventId: string, body: { name: string; isPublic: boolean }) =>
+      request<{ id: string; name: string; isPublic: boolean; qrToken: string | null }>(
+        `/events/${eventId}/albums`,
+        { method: 'POST', body: JSON.stringify(body) },
+      ),
+  },
+
+  clubs: {
+    list: () => request<Club[]>('/clubs'),
+  },
+
+  admin: {
+    pendingUsers: () => request<PendingUser[]>('/admin/users/pending'),
+    approveUser: (id: string) => request<PendingUser>(`/admin/users/${id}/approve`, { method: 'POST' }),
   },
 
   albums: {
@@ -64,6 +95,7 @@ export const api = {
       request<{ items: MediaItem[]; nextCursor: string | null }>(
         `/albums/${albumId}/media${cursor ? `?cursor=${cursor}` : ''}`,
       ),
+    delete: (albumId: string) => request<null>(`/albums/${albumId}`, { method: 'DELETE' }),
     presign: (albumId: string, body: { fileName: string; contentType: string }) =>
       request<{ uploadUrl: string; s3Key: string }>(
         `/albums/${albumId}/media/presign`,
@@ -152,7 +184,7 @@ export interface AlbumShare {
   id: string;
   name: string;
   event: { name: string; club: { name: string } };
-  media: { id: string; thumbKey: string | null; tags: string[] }[];
+  media: { id: string; s3Key: string; thumbKey: string | null; tags: string[] }[];
 }
 
 export interface CreateEventBody {

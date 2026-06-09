@@ -21,7 +21,7 @@ albumsRouter.get('/share/:token', async (req, res, next) => {
         media: {
           take: 24,
           orderBy: { createdAt: 'desc' },
-          select: { id: true, thumbKey: true, tags: true },
+          select: { id: true, s3Key: true, thumbKey: true, tags: true },
         },
       },
     });
@@ -57,7 +57,7 @@ albumsRouter.get('/:id/media', requireAuth, async (req, res, next) => {
 
     const isPrivate = !album.isPublic;
     const isMember = album.members.length > 0;
-    const isAdminOrPhotographer = ['ADMIN', 'PHOTOGRAPHER'].includes(req.auth!.role);
+    const isAdminOrPhotographer = ['ADMIN', 'CLUB', 'PHOTOGRAPHER'].includes(req.auth!.role);
 
     if (isPrivate && !isMember && !isAdminOrPhotographer) {
       res.status(403).json({ ok: false, error: 'Access denied to private album' });
@@ -89,7 +89,7 @@ albumsRouter.get('/:id/media', requireAuth, async (req, res, next) => {
 albumsRouter.post(
   '/:id/media/presign',
   requireAuth,
-  requireRole('ADMIN', 'PHOTOGRAPHER'),
+  requireRole('ADMIN', 'CLUB', 'PHOTOGRAPHER', 'MEMBER'),
   async (req, res, next) => {
     try {
       const albumId = param(req, 'id');
@@ -110,7 +110,7 @@ albumsRouter.post(
 albumsRouter.post(
   '/:id/media/confirm',
   requireAuth,
-  requireRole('ADMIN', 'PHOTOGRAPHER'),
+  requireRole('ADMIN', 'CLUB', 'PHOTOGRAPHER', 'MEMBER'),
   async (req, res, next) => {
     try {
       const albumId = param(req, 'id');
@@ -140,6 +140,17 @@ albumsRouter.post(
     }
   },
 );
+
+// DELETE /albums/:id — admin or club account
+albumsRouter.delete('/:id', requireAuth, requireRole('ADMIN', 'CLUB'), async (req, res, next) => {
+  try {
+    const id = param(req, 'id');
+    await prisma.album.delete({ where: { id } });
+    res.json({ ok: true, data: null });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // GET /albums/:id/qr — get or generate QR share token
 albumsRouter.get('/:id/qr', requireAuth, async (req, res, next) => {

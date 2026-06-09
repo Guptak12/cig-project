@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { InfiniteGallery } from '@/components/InfiniteGallery';
+import { DeleteAlbumButton } from '@/components/DeleteAlbumButton';
 
 interface Props {
   params: Promise<{ id: string; albumId: string }>;
@@ -44,6 +45,10 @@ export default async function AlbumPage({ params }: Props) {
       </nav>
 
       {/* Gallery — client component handles auth + infinite scroll */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-6)' }}>
+        <DeleteAlbumButton albumId={albumId} eventId={id} />
+      </div>
+
       <InfiniteGallery albumId={albumId} thumbBaseUrl={cdnUrl} />
     </div>
   );

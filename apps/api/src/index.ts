@@ -6,6 +6,8 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 
 import { authRouter } from './routes/auth.js';
+import { adminRouter } from './routes/admin.js';
+import { clubsRouter } from './routes/clubs.js';
 import { eventsRouter } from './routes/events.js';
 import { albumsRouter } from './routes/albums.js';
 import { mediaRouter } from './routes/media.js';
@@ -39,6 +41,8 @@ app.use(
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
 app.use('/auth', authRouter);
+app.use('/admin', adminRouter);
+app.use('/clubs', clubsRouter);
 app.use('/events', eventsRouter);
 app.use('/albums', albumsRouter);
 app.use('/media', mediaRouter);

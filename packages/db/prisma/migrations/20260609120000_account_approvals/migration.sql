@@ -1,0 +1,4 @@
+
+ALTER TABLE "User"
+ADD COLUMN "isApproved" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN "approvedAt" TIMESTAMP(3);

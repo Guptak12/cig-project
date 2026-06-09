@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { EventAlbumComposer } from '@/components/EventAlbumComposer';
+import { DeleteEventButton } from '@/components/DeleteEventButton';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -31,7 +33,7 @@ interface EventDetail {
 async function getEvent(id: string): Promise<EventDetail | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
-    const res = await fetch(`${apiUrl}/events/${id}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${apiUrl}/events/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data ?? null;
@@ -70,9 +72,12 @@ export default async function EventDetailPage({ params }: Props) {
 
       {/* Event header */}
       <header style={{ marginBottom: 'var(--space-10)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
-          <span className="badge badge-purple">{event.club.name}</span>
-          {!event.isPublic && <span className="badge badge-amber">🔒 Private</span>}
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--space-4)', alignItems: 'flex-start', marginBottom: 'var(--space-3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <span className="badge badge-purple">{event.club.name}</span>
+            {!event.isPublic && <span className="badge badge-amber">🔒 Private</span>}
+          </div>
+          <DeleteEventButton eventId={event.id} />
         </div>
 
         <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.5rem)', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 'var(--space-3)' }}>
@@ -95,6 +100,8 @@ export default async function EventDetailPage({ params }: Props) {
           })}
         </p>
       </header>
+
+      <EventAlbumComposer eventId={event.id} />
 
       {/* Albums */}
       <section>

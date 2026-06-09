@@ -10,6 +10,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.cloudfront.net',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+      },
     ],
   },
   // Allow cross-origin requests from API in dev

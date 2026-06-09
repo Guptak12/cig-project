@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-export const Role = z.enum(['ADMIN', 'PHOTOGRAPHER', 'MEMBER']);
+export const Role = z.enum(['ADMIN', 'CLUB', 'PHOTOGRAPHER', 'MEMBER']);
 export type Role = z.infer<typeof Role>;
 
 export const ReactionType = z.enum(['like', 'love', 'fire']);
@@ -30,7 +30,7 @@ export const CreateEventSchema = z.object({
   name: z.string().min(2),
   description: z.string().optional(),
   date: z.string().datetime(),
-  clubId: z.string().cuid(),
+  clubId: z.string().min(1),
   isPublic: z.boolean().default(true),
 });
 export type CreateEventInput = z.infer<typeof CreateEventSchema>;

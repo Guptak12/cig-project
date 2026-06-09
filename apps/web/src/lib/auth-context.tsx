@@ -8,7 +8,12 @@ interface AuthContextValue {
   token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    role?: 'ADMIN' | 'CLUB' | 'PHOTOGRAPHER' | 'MEMBER',
+  ) => Promise<{ needsApproval: boolean; message?: string }>;
   logout: () => void;
 }
 
@@ -36,16 +41,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function login(email: string, password: string) {
     const result = await api.auth.login({ email, password });
+    if (!result.token) {
+      throw new Error('Login failed');
+    }
+
     localStorage.setItem('cig-token', result.token);
     setToken(result.token);
     setUser(result.user);
   }
 
-  async function register(name: string, email: string, password: string) {
-    const result = await api.auth.register({ name, email, password });
-    localStorage.setItem('cig-token', result.token);
-    setToken(result.token);
-    setUser(result.user);
+  async function register(
+    name: string,
+    email: string,
+    password: string,
+    role: 'ADMIN' | 'CLUB' | 'PHOTOGRAPHER' | 'MEMBER' = 'MEMBER',
+  ) {
+    const result = await api.auth.register({ name, email, password, role });
+
+    if (result.token) {
+      localStorage.setItem('cig-token', result.token);
+      setToken(result.token);
+      setUser(result.user);
+    } else {
+      setToken(null);
+      setUser(null);
+    }
+
+    return { needsApproval: result.needsApproval, message: result.message };
   }
 
   function logout() {
