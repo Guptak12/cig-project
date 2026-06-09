@@ -52,7 +52,7 @@ export async function searchFacesInPhoto(photoS3Key: string): Promise<string[]> 
   if (isMock) {
     const { prisma } = await import('@cig/db');
     const users = await prisma.user.findMany({ where: { faceId: { not: null } } });
-    return users.map((u) => u.faceId!).filter(Boolean);
+    return users.map((u: { faceId: string | null }) => u.faceId!).filter(Boolean);
   }
 
   const imageBuffer = await fetchS3Object(photoS3Key);
