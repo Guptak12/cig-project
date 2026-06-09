@@ -103,8 +103,8 @@ app.get('/health', (_req, res) => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`[api] Listening on http://localhost:${PORT}`);
+app.listen(Number(PORT), '0.0.0.0', () => {
+  console.log(`[api] Listening on http://0.0.0.0:${PORT}`);
 });
 
 export default app;
