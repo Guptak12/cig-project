@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL! } } });
+const prisma = new PrismaClient();
 
 const ADMIN_EMAIL = 'admin@example.com';
 const ADMIN_NAME  = 'Super Admin';
