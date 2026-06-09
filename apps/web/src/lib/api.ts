@@ -156,6 +156,7 @@ export interface MediaItem {
   id: string;
   s3Key: string;
   thumbKey: string | null;
+  viewUrl: string;
   mimeType: string;
   tags: string[];
   faceIds: string[];

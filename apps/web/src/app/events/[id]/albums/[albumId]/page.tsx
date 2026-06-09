@@ -21,7 +21,6 @@ export default async function AlbumPage({ params }: Props) {
   const { id, albumId } = await params;
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
-  const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL ?? '';
 
   // Fetch event info for breadcrumb
   let eventName = 'Event';
@@ -51,7 +50,7 @@ export default async function AlbumPage({ params }: Props) {
         <DeleteAlbumButton albumId={albumId} eventId={id} />
       </div>
 
-      <InfiniteGallery albumId={albumId} thumbBaseUrl={cdnUrl} />
+      <InfiniteGallery albumId={albumId} />
     </div>
   );
 }

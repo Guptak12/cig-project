@@ -4,25 +4,16 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SpotlightCard } from './SpotlightCard';
-import { api } from '@/lib/api';
-import { buildMediaUrl } from '@/lib/media-url';
+import { api, type MediaItem } from '@/lib/api';
 import { downloadMedia } from '@/lib/download-media';
 
-interface MediaItem {
-  id: string;
-  thumbKey: string | null;
-  s3Key: string;
-  tags: string[];
-  _count: { reactions: number; comments: number };
-  uploadedBy: { id: string; name: string };
-}
 
 interface Props {
   albumId: string;
-  thumbBaseUrl: string; // CloudFront base URL for public thumbs
 }
 
-export function InfiniteGallery({ albumId, thumbBaseUrl }: Props) {
+export function InfiniteGallery({ albumId }: Props) {
+
   const [items, setItems] = useState<MediaItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -100,7 +91,7 @@ export function InfiniteGallery({ albumId, thumbBaseUrl }: Props) {
     <>
       <div className="gallery-grid">
         {items.map((item) => (
-          <GalleryCard key={item.id} item={item} thumbBaseUrl={thumbBaseUrl} />
+        <GalleryCard key={item.id} item={item} />
         ))}
 
         {/* Skeleton placeholders while loading */}
@@ -134,14 +125,14 @@ export function InfiniteGallery({ albumId, thumbBaseUrl }: Props) {
 
 // ─── Individual card ───
 
-function GalleryCard({ item, thumbBaseUrl }: { item: MediaItem; thumbBaseUrl: string }) {
+function GalleryCard({ item }: { item: MediaItem }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(item._count.reactions);
   const [isHovered, setIsHovered] = useState(false);
 
-  const thumbUrl = item.thumbKey
-    ? buildMediaUrl(thumbBaseUrl, 'thumbs', item.thumbKey)
-    : buildMediaUrl(thumbBaseUrl, 'originals', item.s3Key);
+  // Use the server-resolved viewUrl directly — the API already chose
+  // CloudFront for thumbs or a presigned S3 URL for originals.
+  const thumbUrl = item.viewUrl;
 
   function handleLike() {
     const next = !isLiked;

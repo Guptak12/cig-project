@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { prisma } from '@cig/db';
 import { PresignRequestSchema, ConfirmUploadSchema } from '@cig/types';
 import { requireAuth, requireRole } from '../middleware/auth.js';
-import { generatePresignedUploadUrl } from '@cig/utils';
+import { generatePresignedUploadUrl, generatePresignedViewUrl } from '@cig/utils';
 import { mediaProcessQueue } from '@cig/utils';
 import { param } from '../middleware/params.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -79,7 +79,29 @@ albumsRouter.get('/:id/media', requireAuth, async (req, res, next) => {
     const page = hasMore ? items.slice(0, limit) : items;
     const nextCursor = hasMore ? page[page.length - 1].id : null;
 
-    res.json({ ok: true, data: { items: page, nextCursor } });
+    const cdnBase = process.env.CDN_URL ?? '';
+
+    // Resolve view URL server-side:
+    //  - thumbKey exists → CloudFront (fast, public, no expiry)
+    //  - thumbKey null   → presigned S3 URL for originals (15-min expiry)
+    const itemsWithUrls = await Promise.all(
+      page.map(async (item) => {
+        let viewUrl: string;
+        if (item.thumbKey && cdnBase) {
+          const normalizedBase = cdnBase.replace(/\/$/, '');
+          const normalizedKey = item.thumbKey.startsWith('/')
+            ? item.thumbKey.slice(1)
+            : item.thumbKey;
+          viewUrl = `${normalizedBase}/${normalizedKey}`;
+        } else {
+          // Fallback: generate a presigned URL for the original
+          viewUrl = await generatePresignedViewUrl(item.s3Key);
+        }
+        return { ...item, viewUrl };
+      }),
+    );
+
+    res.json({ ok: true, data: { items: itemsWithUrls, nextCursor } });
   } catch (err) {
     next(err);
   }
