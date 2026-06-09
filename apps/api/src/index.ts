@@ -28,20 +28,9 @@ app.use(helmet());
 const webUrl = process.env.WEB_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
 const allowedOrigins = [webUrl, 'http://localhost:3000'];
 
-app.use(cors({ 
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Allow configured origins and Vercel deployments (both prod and preview)
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('https://cig-project-web')) {
-      callback(null, true);
-    } else {
-      console.warn(`Blocked CORS request from origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  }, 
-  credentials: true 
+app.use(cors({
+  origin: true, // Allow any origin (reflects request origin)
+  credentials: true,
 }));
 
 app.use(morgan('dev'));
