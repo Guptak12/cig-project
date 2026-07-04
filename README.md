@@ -4,7 +4,7 @@ Event media management for clubs, societies, and campus communities.
 
 CIG Platform is a full-stack gallery system for collecting, organizing, searching, sharing, and downloading event media. It combines event-wise albums, role-based workflows, AWS-backed storage, Rekognition-powered image intelligence, QR sharing, and a background processing pipeline for thumbnails, labels, and face discovery.
 
-- Demo Video: `https://drive.google.com/file/d/1Duai3ra-tE-iZclKRwnv3fHKdLbY-Ac8/view?usp=sharing`
+- Demo Video: [Watch Here](https://drive.google.com/file/d/1Duai3ra-tE-iZclKRwnv3fHKdLbY-Ac8/view?usp=sharing)
  
 Production deployment:
 - Web: `https://cig-project-web.vercel.app`
