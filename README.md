@@ -1,4 +1,4 @@
-# CIG Platform
+# AURA- Event & Media Management Platform
 
 Event media management for clubs, societies, and campus communities.
 
