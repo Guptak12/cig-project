@@ -15,7 +15,10 @@ if (isMock) {
   fs.mkdirSync(path.join(STORAGE_DIR, 'thumbs'), { recursive: true });
 }
 
-const endpoint = process.env.S3_ENDPOINT || process.env.CLOUDFLARE_R2_ENDPOINT;
+let endpoint = process.env.S3_ENDPOINT || process.env.CLOUDFLARE_R2_ENDPOINT;
+if (endpoint) {
+  endpoint = endpoint.trim().replace(/^["']|["']$/g, '').replace(/\.storage\.supabase\.co/, '.supabase.co');
+}
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION ?? 'us-east-1',
