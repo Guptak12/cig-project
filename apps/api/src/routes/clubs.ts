@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { prisma } from '@cig/db';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 
 export const clubsRouter = Router();
 
