@@ -114,6 +114,18 @@ app.listen(Number(PORT), '0.0.0.0', async () => {
       }).catch((e) => console.log('[api] Auto-seed notice:', e.message));
       console.log('[api] Default admin user initialized (admin@example.com)');
     }
+
+    const clubCount = await prisma.club.count().catch(() => 0);
+    if (clubCount === 0) {
+      await prisma.club.create({
+        data: {
+          id: 'default-club',
+          name: 'Photography Society',
+          logoUrl: null,
+        },
+      }).catch((e) => console.log('[api] Club seed notice:', e.message));
+      console.log('[api] Default club initialized (Photography Society)');
+    }
   } catch (err) {
     console.log('[api] Startup database check completed');
   }
