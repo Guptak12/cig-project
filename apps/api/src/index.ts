@@ -96,8 +96,10 @@ app.use(errorHandler);
 app.listen(Number(PORT), '0.0.0.0', async () => {
   console.log(`[api] Listening on http://0.0.0.0:${PORT}`);
   try {
-    const { prisma } = await import('@cig/db');
+    const { prisma, initDbTables } = await import('@cig/db');
     const bcrypt = await import('bcryptjs');
+    await initDbTables();
+
     const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } }).catch(() => 0);
     if (adminCount === 0) {
       const passwordHash = await bcrypt.default.hash('ChangeMeNow!', 10);
@@ -113,7 +115,7 @@ app.listen(Number(PORT), '0.0.0.0', async () => {
       console.log('[api] Default admin user initialized (admin@example.com)');
     }
   } catch (err) {
-    console.log('[api] Auto-seed check finished');
+    console.log('[api] Startup database check completed');
   }
 });
 

@@ -9,7 +9,13 @@ import dotenv from 'dotenv';
 // Load .env (if not already loaded by the consuming app)
 dotenv.config();
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL || "postgresql://cig:cig_secret@localhost:5432/cig_db" });
+const connectionString = process.env.DATABASE_URL || "postgresql://cig:cig_secret@localhost:5432/cig_db";
+const isLocal = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
+
+const pool = new pg.Pool({
+  connectionString,
+  ...(isLocal ? {} : { ssl: { rejectUnauthorized: false } }),
+});
 const adapter = new PrismaPg(pool);
 
 const globalForPrisma = globalThis as unknown as {
@@ -29,6 +35,8 @@ export const prisma =
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
+
+export { initDbTables } from './init-db.js';
 
 // Re-export everything from @prisma/client so consumers only need @cig/db
 export * from '@prisma/client';
