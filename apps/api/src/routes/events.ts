@@ -52,9 +52,14 @@ eventsRouter.get('/:id', async (req, res, next) => {
       include: {
         club: true,
         albums: {
-          where: { isPublic: true },
           orderBy: { name: 'asc' },
-          select: { id: true, name: true, isPublic: true, qrToken: true },
+          select: {
+            id: true,
+            name: true,
+            isPublic: true,
+            qrToken: true,
+            media: { select: { s3Key: true }, take: 1, orderBy: { createdAt: 'desc' } },
+          },
         },
       },
     });
@@ -64,7 +69,25 @@ eventsRouter.get('/:id', async (req, res, next) => {
       return;
     }
 
-    res.json({ ok: true, data: event });
+    const { generatePresignedViewUrl } = await import('@cig/utils');
+    const albumsWithCovers = await Promise.all(
+      event.albums.map(async (album) => {
+        const firstMedia = album.media?.[0];
+        let coverUrl: string | null = null;
+        if (firstMedia) {
+          coverUrl = await generatePresignedViewUrl(firstMedia.s3Key);
+        }
+        return {
+          id: album.id,
+          name: album.name,
+          isPublic: album.isPublic,
+          qrToken: album.qrToken,
+          coverUrl,
+        };
+      })
+    );
+
+    res.json({ ok: true, data: { ...event, albums: albumsWithCovers } });
   } catch (err) {
     next(err);
   }

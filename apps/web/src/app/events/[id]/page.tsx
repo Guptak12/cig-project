@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { EventAlbumComposer } from '@/components/EventAlbumComposer';
 import { DeleteEventButton } from '@/components/DeleteEventButton';
 
@@ -29,7 +30,7 @@ interface EventDetail {
   date: string;
   isPublic: boolean;
   club: { id: string; name: string; logoUrl: string | null };
-  albums: { id: string; name: string; isPublic: boolean; qrToken: string | null }[];
+  albums: { id: string; name: string; isPublic: boolean; qrToken: string | null; coverUrl?: string | null }[];
 }
 
 async function getEvent(id: string): Promise<EventDetail | null> {
@@ -127,17 +128,44 @@ export default async function EventDetailPage({ params }: Props) {
             {event.albums.map((album) => (
               <Link key={album.id} href={`/events/${event.id}/albums/${album.id}`} style={{ display: 'block' }}>
                 <div className="card" style={{ padding: 'var(--space-6)' }}>
-                  {/* Album cover placeholder */}
+                  {/* Album cover image or sleek banner */}
                   <div
                     style={{
                       width: '100%',
                       aspectRatio: '16/9',
                       borderRadius: 'var(--radius-md)',
-                      background: 'var(--gradient-primary)',
-                      opacity: 0.15,
+                      position: 'relative',
+                      overflow: 'hidden',
+                      background: 'var(--gradient-card)',
+                      border: '1px solid var(--color-border)',
                       marginBottom: 'var(--space-4)',
                     }}
-                  />
+                  >
+                    {album.coverUrl ? (
+                      <Image
+                        src={album.coverUrl}
+                        alt={album.name}
+                        fill
+                        sizes="280px"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15))',
+                          color: 'var(--color-text-muted)',
+                          fontSize: '1.5rem',
+                        }}
+                      >
+                        📁
+                      </div>
+                    )}
+                  </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ fontWeight: 600, fontSize: '0.95rem' }}>{album.name}</h3>
                     {!album.isPublic && <span className="badge badge-amber" style={{ fontSize: '0.7rem' }}>🔒</span>}
