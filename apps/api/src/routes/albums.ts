@@ -149,12 +149,24 @@ albumsRouter.post(
         },
       });
 
-      // Enqueue background job: thumbnail + AI tagging + face search
+      // Execute face search & AI tagging immediately so faceIds & tags are attached right away
+      const { searchFacesInPhoto, detectImageLabels } = await import('@cig/utils');
+      searchFacesInPhoto(body.s3Key)
+        .then(async (faceIds) => {
+          const tags = await detectImageLabels(body.s3Key);
+          await prisma.media.update({
+            where: { id: media.id },
+            data: { faceIds, tags },
+          });
+        })
+        .catch((err) => console.warn('[confirm] inline processing warning:', err.message));
+
+      // Also enqueue background job for Redis queue listeners
       await mediaProcessQueue.add('process', {
         mediaId: media.id,
         s3Key: body.s3Key,
         albumId: body.albumId,
-      });
+      }).catch(() => {});
 
       res.status(201).json({ ok: true, data: media });
     } catch (err) {

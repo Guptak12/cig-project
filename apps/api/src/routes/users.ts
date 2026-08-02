@@ -71,8 +71,17 @@ usersRouter.get('/me/photos', requireAuth, async (req, res, next) => {
       ORDER BY "createdAt" DESC
       LIMIT 100
     `;
+    const { generatePresignedViewUrl } = await import('@cig/utils');
+    const photosWithUrls = await Promise.all(
+      photos.map(async (photo) => ({
+        ...photo,
+        viewUrl: await generatePresignedViewUrl(photo.s3Key),
+        tags: [],
+        _count: { reactions: 0, comments: 0 },
+      }))
+    );
 
-    res.json({ ok: true, data: photos });
+    res.json({ ok: true, data: photosWithUrls });
   } catch (err) {
     next(err);
   }

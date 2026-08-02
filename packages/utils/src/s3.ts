@@ -73,6 +73,12 @@ if (isMock) {
 export const BUCKET_ORIGINALS = process.env.S3_BUCKET_ORIGINALS ?? 'cig-originals';
 export const BUCKET_THUMBS = process.env.S3_BUCKET_THUMBS ?? 'cig-thumbs';
 
+const apiPublicBase = (
+  process.env.API_PUBLIC_URL ||
+  process.env.RENDER_EXTERNAL_URL ||
+  'https://aura-z3li.onrender.com'
+).replace(/\/$/, '');
+
 /**
  * Generate a presigned PUT URL so the client uploads directly to S3.
  */
@@ -85,7 +91,7 @@ export async function generatePresignedUploadUrl(opts: {
   const s3Key = `albums/${opts.albumId}/${uuidv4()}.${ext}`;
 
   if (isMock || !process.env.S3_ENDPOINT) {
-    const uploadUrl = `http://localhost:4000/mock-s3-upload?key=${s3Key}`;
+    const uploadUrl = `${apiPublicBase}/mock-s3-upload?key=${encodeURIComponent(s3Key)}`;
     return { uploadUrl, s3Key };
   }
 
@@ -99,7 +105,7 @@ export async function generatePresignedUploadUrl(opts: {
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
     return { uploadUrl, s3Key };
   } catch {
-    const uploadUrl = `http://localhost:4000/mock-s3-upload?key=${s3Key}`;
+    const uploadUrl = `${apiPublicBase}/mock-s3-upload?key=${encodeURIComponent(s3Key)}`;
     return { uploadUrl, s3Key };
   }
 }
@@ -109,7 +115,7 @@ export async function generatePresignedUploadUrl(opts: {
  */
 export async function generatePresignedViewUrl(s3Key: string): Promise<string> {
   if (isMock || !process.env.S3_ENDPOINT) {
-    return `http://localhost:4000/mock-s3-view/originals/${s3Key}`;
+    return `${apiPublicBase}/media/view?key=${encodeURIComponent(s3Key)}`;
   }
   try {
     const command = new GetObjectCommand({
@@ -118,7 +124,7 @@ export async function generatePresignedViewUrl(s3Key: string): Promise<string> {
     });
     return await getSignedUrl(s3, command, { expiresIn: 900 });
   } catch {
-    return `http://localhost:4000/mock-s3-view/originals/${s3Key}`;
+    return `${apiPublicBase}/media/view?key=${encodeURIComponent(s3Key)}`;
   }
 }
 
