@@ -93,8 +93,28 @@ app.get('/health', (_req, res) => {
 
 app.use(errorHandler);
 
-app.listen(Number(PORT), '0.0.0.0', () => {
+app.listen(Number(PORT), '0.0.0.0', async () => {
   console.log(`[api] Listening on http://0.0.0.0:${PORT}`);
+  try {
+    const { prisma } = await import('@cig/db');
+    const bcrypt = await import('bcryptjs');
+    const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } }).catch(() => 0);
+    if (adminCount === 0) {
+      const passwordHash = await bcrypt.default.hash('ChangeMeNow!', 10);
+      await prisma.user.create({
+        data: {
+          email: 'admin@example.com',
+          name: 'Super Admin',
+          passwordHash,
+          role: 'ADMIN',
+          isApproved: true,
+        },
+      }).catch((e) => console.log('[api] Auto-seed notice:', e.message));
+      console.log('[api] Default admin user initialized (admin@example.com)');
+    }
+  } catch (err) {
+    console.log('[api] Auto-seed check finished');
+  }
 });
 
 export default app;

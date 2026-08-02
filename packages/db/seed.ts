@@ -1,8 +1,5 @@
-import 'dotenv/config';
-import { PrismaClient, Role } from '@prisma/client';
+import { prisma, Role } from './src/index.js';
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
 
 const ADMIN_EMAIL = 'admin@example.com';
 const ADMIN_NAME  = 'Super Admin';
