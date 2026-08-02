@@ -160,6 +160,28 @@ export async function uploadToThumbsBucket(opts: {
     Key: opts.key,
     Body: opts.buffer,
     ContentType: opts.contentType,
+  await s3.send(command);
+}
+
+/**
+ * Upload a raw buffer to the originals bucket (e.g. user selfie).
+ */
+export async function uploadToOriginalsBucket(opts: {
+  key: string;
+  buffer: Buffer;
+  contentType: string;
+}): Promise<void> {
+  if (isMock) {
+    const filePath = path.join(STORAGE_DIR, 'originals', opts.key);
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, opts.buffer);
+    return;
+  }
+  const command = new PutObjectCommand({
+    Bucket: BUCKET_ORIGINALS,
+    Key: opts.key,
+    Body: opts.buffer,
+    ContentType: opts.contentType,
   });
   await s3.send(command);
 }

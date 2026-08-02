@@ -19,27 +19,14 @@ usersRouter.post('/selfie', requireAuth, upload.single('selfie'), async (req, re
 
     const userId = req.auth!.userId;
 
-    // Upload selfie to S3 originals bucket under a private path
-    const { uploadUrl: _unused, s3Key: selfieKey } = await generatePresignedUploadUrl({
-      albumId: `selfies/${userId}`,
-      fileName: 'selfie.jpg',
+    const s3Key = `selfies/${userId}/selfie.jpg`;
+    const { uploadToOriginalsBucket } = await import('@cig/utils');
+
+    await uploadToOriginalsBucket({
+      key: s3Key,
+      buffer: req.file.buffer,
       contentType: req.file.mimetype,
     });
-
-    // Upload directly using AWS SDK (not presigned, since we have the buffer)
-    const { uploadToThumbsBucket: _skip, s3: s3Client } = await import('@cig/utils');
-    const { PutObjectCommand } = await import('@aws-sdk/client-s3');
-    const { BUCKET_ORIGINALS } = await import('@cig/utils');
-
-    const s3Key = `selfies/${userId}/selfie.jpg`;
-    await s3Client.send(
-      new PutObjectCommand({
-        Bucket: BUCKET_ORIGINALS,
-        Key: s3Key,
-        Body: req.file.buffer,
-        ContentType: req.file.mimetype,
-      }),
-    );
 
     // Index in Rekognition → get faceId
     const faceId = await indexUserFace(s3Key, userId);
