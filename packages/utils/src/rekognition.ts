@@ -8,11 +8,12 @@ import {
 import sharp from 'sharp';
 import { fetchS3Object } from './s3.js';
 
-const isMockOrLocal =
-  process.env.USE_LOCAL_AI === 'true' ||
-  !process.env.AWS_ACCESS_KEY_ID ||
-  process.env.AWS_ACCESS_KEY_ID === 'mock-access-key-id' ||
-  process.env.AWS_ACCESS_KEY_ID === 'mock';
+const isAwsRekognitionConfigured =
+  process.env.USE_LOCAL_AI !== 'true' &&
+  process.env.AWS_ACCESS_KEY_ID &&
+  (process.env.AWS_ACCESS_KEY_ID.startsWith('AKIA') || process.env.AWS_ACCESS_KEY_ID.startsWith('ASIA'));
+
+const isMockOrLocal = !isAwsRekognitionConfigured;
 
 const rekognition = isMockOrLocal
   ? null
