@@ -18,8 +18,8 @@ if (isMock) {
 const endpoint = process.env.S3_ENDPOINT || process.env.CLOUDFLARE_R2_ENDPOINT;
 
 const s3 = new S3Client({
-  region: process.env.AWS_REGION ?? 'auto',
-  ...(endpoint ? { endpoint } : {}),
+  region: process.env.AWS_REGION ?? 'us-east-1',
+  ...(endpoint ? { endpoint, forcePathStyle: true } : {}),
   credentials: {
     accessKeyId:
       process.env.S3_ACCESS_KEY_ID ??
