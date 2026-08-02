@@ -4,19 +4,33 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 
-const isMock = process.env.AWS_ACCESS_KEY_ID === 'mock-access-key-id';
-const STORAGE_DIR = '/Users/destructor/Desktop/Kush/Projects/cig-project/storage';
+const isMock =
+  process.env.AWS_ACCESS_KEY_ID === 'mock-access-key-id' ||
+  process.env.STORAGE_PROVIDER === 'mock';
+
+const STORAGE_DIR = process.env.STORAGE_LOCAL_DIR ?? path.join(process.cwd(), 'storage');
 
 if (isMock) {
   fs.mkdirSync(path.join(STORAGE_DIR, 'originals'), { recursive: true });
   fs.mkdirSync(path.join(STORAGE_DIR, 'thumbs'), { recursive: true });
 }
 
+const endpoint = process.env.S3_ENDPOINT || process.env.CLOUDFLARE_R2_ENDPOINT;
+
 const s3 = new S3Client({
-  region: process.env.AWS_REGION ?? 'us-east-1',
+  region: process.env.AWS_REGION ?? 'auto',
+  ...(endpoint ? { endpoint } : {}),
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? 'mock',
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? 'mock',
+    accessKeyId:
+      process.env.S3_ACCESS_KEY_ID ??
+      process.env.R2_ACCESS_KEY_ID ??
+      process.env.AWS_ACCESS_KEY_ID ??
+      'mock',
+    secretAccessKey:
+      process.env.S3_SECRET_ACCESS_KEY ??
+      process.env.R2_SECRET_ACCESS_KEY ??
+      process.env.AWS_SECRET_ACCESS_KEY ??
+      'mock',
   },
 });
 

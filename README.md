@@ -225,6 +225,39 @@ The worker command is:
 node dist/worker.js
 ```
 
+## 100% Free Cloud Deployment (Zero AWS Account Required)
+
+You can run the entire platform at **$0/month** using free tiers across top cloud providers:
+
+| Layer | Provider | Free Allowance | Configuration |
+| --- | --- | --- | --- |
+| **Media Storage** | **Cloudflare R2** | 10 GB storage, $0 egress fees | Set `S3_ENDPOINT=https://<account_id>.r2.cloudflarestorage.com` |
+| **Database** | **Neon.tech** | 500 MB PostgreSQL | Set `DATABASE_URL=postgresql://...` |
+| **Queue / Cache** | **Upstash Redis** | 10,000 commands/day | Set `REDIS_URL=rediss://...` |
+| **API Backend** | **Render.com** | Free Web Service | Start command: `npx tsx apps/api/src/index.ts` |
+| **Background Worker** | **Render.com** | Free Background Worker | Start command: `npx tsx apps/api/src/worker.ts` |
+| **Frontend Web** | **Vercel** | Free Hobby tier | `NEXT_PUBLIC_API_URL=<render-api-url>` |
+| **AI / Faces** | **Local AI Engine** | 100% Free local execution | Set `USE_LOCAL_AI=true` |
+
+### Setting Up Cloudflare R2 Storage (Replacing S3)
+
+1. Create a free account at [Cloudflare Dashboard](https://dash.cloudflare.com).
+2. Go to **R2** -> **Create bucket** and create two buckets:
+   - `cig-media-originals`
+   - `cig-media-thumbs`
+3. Go to **R2** -> **Manage R2 API Tokens** -> **Create API Token** (Edit permissions).
+4. Copy the **Account ID**, **Access Key ID**, and **Secret Access Key**.
+5. Set environment variables on your backend:
+
+```bash
+S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+S3_ACCESS_KEY_ID=<r2-access-key-id>
+S3_SECRET_ACCESS_KEY=<r2-secret-access-key>
+S3_BUCKET_ORIGINALS=cig-media-originals
+S3_BUCKET_THUMBS=cig-media-thumbs
+USE_LOCAL_AI=true
+```
+
 ## Vercel Deployment
 
 Set these variables on the Vercel project before building:
