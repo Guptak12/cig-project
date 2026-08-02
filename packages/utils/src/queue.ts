@@ -2,9 +2,13 @@ import { Queue, Worker, type Job } from 'bullmq';
 
 // BullMQ bundles its own ioredis — pass URL string, not an external Redis instance.
 // This avoids type conflicts between the two ioredis versions.
+const rawRedisUrl = (process.env.REDIS_URL ?? 'redis://localhost:6379')
+  .trim()
+  .replace(/^["']|["']$/g, '');
+
 const redisOpts = {
   connection: {
-    url: process.env.REDIS_URL ?? 'redis://localhost:6379',
+    url: rawRedisUrl,
     maxRetriesPerRequest: null as null, // required by BullMQ
   },
 };
