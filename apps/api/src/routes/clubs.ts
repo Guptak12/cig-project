@@ -16,3 +16,16 @@ clubsRouter.get('/', async (_req, res, next) => {
     next(err);
   }
 });
+
+// POST /clubs — admin creates a club
+clubsRouter.post('/', requireAuth, requireRole('ADMIN'), async (req, res, next) => {
+  try {
+    const { name, logoUrl } = req.body;
+    const club = await prisma.club.create({
+      data: { name: name ?? 'Photography Society', logoUrl: logoUrl ?? null },
+    });
+    res.status(201).json({ ok: true, data: club });
+  } catch (err) {
+    next(err);
+  }
+});
