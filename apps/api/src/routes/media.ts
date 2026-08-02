@@ -62,18 +62,22 @@ mediaRouter.get('/:id/download', requireAuth, async (req, res, next) => {
     // Fetch original from S3
     const imageBuffer = await fetchS3Object(media.s3Key);
 
-    // Apply watermark with club, event, and role context
-    const watermarked = await applyWatermark(imageBuffer, {
-      clubName: media.album.event.club.name,
-      eventName: media.album.event.name,
-      userRole: req.auth!.role,
-    });
+    let finalBuffer = imageBuffer;
+    try {
+      finalBuffer = await applyWatermark(imageBuffer, {
+        clubName: media.album.event.club.name,
+        eventName: media.album.event.name,
+        userRole: req.auth!.role,
+      });
+    } catch {
+      finalBuffer = imageBuffer;
+    }
 
-    // Return as downloadable JPEG
     const filename = `${media.album.event.name.replace(/\s+/g, '-')}-${media.id}.jpg`;
     res.setHeader('Content-Type', 'image/jpeg');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(watermarked);
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+    res.send(finalBuffer);
   } catch (err) {
     next(err);
   }

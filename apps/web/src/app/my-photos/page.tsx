@@ -197,9 +197,7 @@ export default function MyPhotosPage() {
           </p>
           <div className="gallery-grid">
             {photos.map((photo) => {
-              const src = photo.thumbKey
-                ? buildMediaUrl(cdnUrl, 'thumbs', photo.thumbKey)
-                : buildMediaUrl(cdnUrl, 'originals', photo.s3Key);
+              const src = photo.viewUrl || buildMediaUrl(cdnUrl, 'originals', photo.s3Key);
               return (
                 <article key={photo.id} className="media-card" style={{ borderRadius: 'var(--radius-md)' }}>
                   <Image

@@ -4,7 +4,9 @@
  * All methods return the unwrapped `data` or throw on error.
  */
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const BASE = (
+  process.env.NEXT_PUBLIC_API_URL || 'https://aura-z3li.onrender.com'
+).replace(/\/$/, '');
 
 async function request<T>(
   path: string,
@@ -170,6 +172,7 @@ export interface MyPhoto {
   id: string;
   s3Key: string;
   thumbKey: string | null;
+  viewUrl?: string;
   albumId: string;
   createdAt: string;
 }
