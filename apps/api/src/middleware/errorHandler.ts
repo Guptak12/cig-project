@@ -30,7 +30,7 @@ export function errorHandler(
     return;
   }
 
-  res.status(500).json({ ok: false, error: 'Internal server error' });
+  res.status(500).json({ ok: false, error: (err as any)?.message ?? 'Internal server error', stack: (err as any)?.stack });
 }
 
 function isZodError(err: unknown): err is { errors: unknown[] } {
