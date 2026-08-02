@@ -23,7 +23,7 @@ const PORT = process.env.PORT ?? 4000;
 // ─── Global middleware ────────────────────────────────────────────────────────
 
 app.set('trust proxy', 1);
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 // Robust CORS configuration
 const webUrl = process.env.WEB_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';

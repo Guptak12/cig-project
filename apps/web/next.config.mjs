@@ -11,6 +11,14 @@ const nextConfig = {
         hostname: '**.cloudfront.net',
       },
       {
+        protocol: 'https',
+        hostname: '**.onrender.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
       },
